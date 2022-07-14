@@ -10,7 +10,7 @@ import UIKit
 class AddToDoViewController: UIViewController {
     @IBOutlet weak var toDoText: UITextField!
     
-    var item: String = ""
+    private var item: String = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,4 +27,7 @@ class AddToDoViewController: UIViewController {
         self.view.endEditing(true)
     }
     
+    func getItemText() -> String {
+        return item
+    }
 }

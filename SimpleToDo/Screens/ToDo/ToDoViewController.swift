@@ -12,30 +12,35 @@ class ToDoViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     @IBOutlet weak var tabelView: UITableView!
     
-    var items: [Item] = []
+    @IBAction func cancel(segue:UIStoryboardSegue) { }
+    
+    private let itemsKey = "items"
     private var changingItemIndex = 0
+    var items: [Item] = []
+    let defaults = UserDefaults.standard
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        items = getItems()
         self.tabelView.delegate = self
         self.tabelView.dataSource = self
         self.tabelView.allowsMultipleSelection = true
     }
-    
-    @IBAction func cancel(segue:UIStoryboardSegue) {
-    }
 
     @IBAction func done(segue:UIStoryboardSegue) {
         if let toDoVC = segue.source as? AddToDoViewController {
-            items.append(Item(toDoVC.item))
+            items.append(Item(text: toDoVC.getItemText()))
             items.sort(by: {$1.checked && !$0.checked})
+            saveItems()
             tabelView.reloadData()
         }
     }
     
     @IBAction func editDone(segue:UIStoryboardSegue) {
         if let toDoVC = segue.source as? EditToDoViewController {
-            items[toDoVC.index].text = toDoVC.toDoText.text ?? ""
+            items[toDoVC.getIndex()].text = toDoVC.getEditedItem()
+            saveItems()
             tabelView.reloadData()
         }
     }
@@ -43,8 +48,7 @@ class ToDoViewController: UIViewController, UITableViewDelegate, UITableViewData
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "editDoneSegue" {
             if let destination = segue.destination as? EditToDoViewController {
-                destination.index = changingItemIndex
-                destination.item = items[changingItemIndex].text
+                destination.edit(index: changingItemIndex, item: items[changingItemIndex].text)
             }
         }
     }
@@ -67,12 +71,14 @@ extension ToDoViewController {
         cell.selectionStyle = .none
         items[indexPath.row].checked = !items[indexPath.row].checked
         items.sort(by: {$1.checked && !$0.checked})
+        saveItems()
         tableView.reloadData()
     }
     
     func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
         items[indexPath.row].checked = !items[indexPath.row].checked
         items.sort(by: {$1.checked && !$0.checked})
+        saveItems()
         tableView.reloadData()
     }
     
@@ -81,6 +87,7 @@ extension ToDoViewController {
             UIContextualAction(style: .destructive, title: "Delete",
                                handler: { [self] (action, view, completionHandler) in
                                    self.items.remove(at: indexPath.row)
+                                   self.saveItems()
                                    completionHandler(true)
                                    self.tabelView.reloadData()
                                })
@@ -98,5 +105,33 @@ extension ToDoViewController {
             })
         ])
         return configuration
+    }
+}
+
+extension ToDoViewController {
+    func saveItems() {
+        let encoder = JSONEncoder()
+        
+        do {
+            let data = try encoder.encode(items)
+            defaults.set(data, forKey: itemsKey)
+        }
+        catch {
+            print("Unable to Encode Array of Items (\(error))")
+        }
+    }
+    
+    func getItems() -> [Item] {
+        if let data = defaults.data(forKey: itemsKey) {
+            let decoder = JSONDecoder()
+            
+            do {
+                return try decoder.decode([Item].self, from: data)
+            }
+            catch {
+                print("Unable to Decode Items (\(error))")
+            }
+        }
+        return []
     }
 }

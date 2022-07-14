@@ -11,10 +11,12 @@ class EditToDoViewController: UIViewController {
     @IBOutlet weak var toDoText: UITextField!
     
     @IBAction func toDoChanged(_ sender: UITextField) {
-        item = toDoText.text ?? ""
+        guard let text = sender.text else { return }
+        item = text
     }
-    var index = 0
-    var item: String = ""
+    
+    private var index = 0
+    private var item: String = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,4 +27,12 @@ class EditToDoViewController: UIViewController {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         self.view.endEditing(true)
     }
+    
+    func edit(index: Int, item: String) {
+        self.index = index
+        self.item = item
+    }
+    
+    func getIndex() -> Int { return index }
+    func getEditedItem() -> String { return toDoText.text ?? "" }
 }
