@@ -30,7 +30,7 @@ class ToDoViewController: UIViewController, UITableViewDelegate, UITableViewData
 
     @IBAction func done(segue:UIStoryboardSegue) {
         if let toDoVC = segue.source as? AddToDoViewController {
-            items.append(Item(toDoVC.item))
+            items.append(Item(text: toDoVC.getItemText()))
             items.sort(by: {$1.checked && !$0.checked})
             saveItems()
             tabelView.reloadData()

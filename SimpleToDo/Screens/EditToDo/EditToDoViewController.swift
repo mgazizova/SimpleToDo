@@ -11,7 +11,8 @@ class EditToDoViewController: UIViewController {
     @IBOutlet weak var toDoText: UITextField!
     
     @IBAction func toDoChanged(_ sender: UITextField) {
-        item = toDoText.text ?? ""
+        guard let text = sender.text else { return }
+        item = text
     }
     
     private var index = 0

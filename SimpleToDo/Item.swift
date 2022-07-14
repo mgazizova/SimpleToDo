@@ -8,7 +8,7 @@ struct Item : Codable {
     var text: String
     var checked = false
     
-    init(_ text: String) {
+    init(text: String) {
         self.text = text
     }
 }
